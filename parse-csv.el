@@ -1,4 +1,4 @@
-;;; parse-csv.el --- Parse CSV fields
+;;; parse-csv.el --- Parse strings with CSV fields into s-expressions
 
 ;; Copyright (C) 2002-2006 Edward Marco Baringer
 ;; All rights reserved.
