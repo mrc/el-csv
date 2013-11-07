@@ -3,8 +3,8 @@
 ;; Copyright (C) 2002-2006 Edward Marco Baringer
 ;; All rights reserved.
 ;;
-;; Author:	Edward Marco Baringer (Common Lisp)
-;; 		Curtis <matt.r.curtis@gmail.com> (Emacs Lisp)
+;; Author: Edward Marco Baringer (Common Lisp)
+;;         Matt Curtis <matt.r.curtis@gmail.com> (Emacs Lisp)
 ;; Maintainer: Matt Curtis <matt.r.curtis@gmail.com>
 ;; Version: 0.1
 ;; Keywords: csv
@@ -49,7 +49,7 @@
 ;; http://common-lisp.net/project/bese/repos/arnesi_dev/src/csv.lisp
 ;; It was ported to Emacs Lisp by Matt Curtis.
 ;;
-;; (csv->list "a,b,\"c,d\"")
+;; (parse-csv->list "a,b,\"c,d\"")
 ;;     => ("a" "b" "c,d")
 ;;
 ;; (parse-csv-string "a;b;'c;d'" ?\; ?\')
@@ -57,16 +57,17 @@
 
 ;;; Code:
 
-(defun csv->list (row)
-  "Parse a string containing comma-separated values into a list
-of strings, respecting double-quoted strings (which may contain
-commas)."
+(require 'cl)
+
+(defun parse-csv->list (row)
+  "Parse a string ROW of comma-separated values into a list of strings.
+Respects double-quoted strings (which may contain commas)."
   (parse-csv-string row ?\, ?\"))
 
 (defun parse-csv-string (line separator quote-char)
-  "Parse a separated and quoted string into a list of strings
-using seperator as the column seperator and quote as the string
-quoting character."
+  "Parse a separated and quoted string LINE into a list of strings.
+Uses SEPARATOR as the column seperator and QUOTE-CHAR as the
+string quoting character."
   (let ((items '())
         (offset 0)
         (current-word "")
@@ -80,7 +81,7 @@ quoting character."
             (error "Unterminated string"))
            (:read-word
             (throw 'return
-              (nreverse (cons current-word items))))))
+                   (nreverse (cons current-word items))))))
        (let ((current (aref line offset)))
          (cond
           ((char-equal separator current)
@@ -107,5 +108,9 @@ quoting character."
        (incf offset)))))
 
 (provide 'parse-csv)
+
+;; Local-Variables:
+;; indent-tabs-mode: nil
+;; End:
 
 ;;; parse-csv.el ends here
