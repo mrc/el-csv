@@ -6,7 +6,8 @@
 ;; Author: Edward Marco Baringer (Common Lisp)
 ;;         Matt Curtis <matt.r.curtis@gmail.com> (Emacs Lisp)
 ;; Maintainer: Matt Curtis <matt.r.curtis@gmail.com>
-;; Version: 0.1
+;; Version: 0.2
+;; Package-Requires ((emacs "24.3"))
 ;; Keywords: csv
 ;; URL: https://github.com/mrc/el-csv
 
@@ -57,7 +58,7 @@
 
 ;;; Code:
 
-(require 'cl)
+(require 'cl-lib)
 
 (defun parse-csv->list (row)
   "Parse a string ROW of comma-separated values into a list of strings.
@@ -76,7 +77,7 @@ string quoting character."
       (loop
        (when (= offset (length line))
          ;; all done
-         (ecase state
+         (cl-ecase state
            (:in-string
             (error "Unterminated string"))
            (:read-word
@@ -85,14 +86,14 @@ string quoting character."
        (let ((current (aref line offset)))
          (cond
           ((char-equal separator current)
-           (ecase state
+           (cl-ecase state
              (:in-string
               (setq current-word (concat current-word (char-to-string current))))
              (:read-word
               (push current-word items)
               (setq current-word ""))))
           ((char-equal quote-char current)
-           (ecase state
+           (cl-ecase state
              (:in-string
               (let ((offset+1 (1+ offset)))
                 (cond
