@@ -34,3 +34,15 @@ Empty fields become empty strings."
   (should (equal (parse-csv->list "\",cat\"") '(",cat")))
   (should (equal (parse-csv->list "\"cat,\"") '("cat,")))
   (should (equal (parse-csv->list "\",cat,\"") '(",cat,"))))
+
+(ert-deftest parse-csv-string-rows/two-simple-lines ()
+  "Should parse two rows"
+  (should (= 2 (length (parse-csv-string-rows "apples,bananas,carrots
+monkies,rabbits,cherries" ?\, ?\" "
+")))))
+
+(ert-deftest parse-csv-string-rows/two-simple-lines-correctly ()
+  "Should parse two rows correctly"
+  (should (equal (length (parse-csv-string-rows "apples,bananas,carrots
+monkies,rabbits,cherries" ?\, ?\" "
+")))))

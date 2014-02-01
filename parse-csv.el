@@ -69,44 +69,67 @@ Respects double-quoted strings (which may contain commas)."
   "Parse a separated and quoted string LINE into a list of strings.
 Uses SEPARATOR as the column seperator and QUOTE-CHAR as the
 string quoting character."
+  (car (parse-csv-string-rows line separator quote-char nil)))
+
+(defun parse-csv-string-rows (data separator quote-char line-sep)
+  "Parse a separated and quoted string DATA into a list of list of strings.
+Uses SEPARATOR as the column seperator, QUOTE-CHAR as the
+string quoting character, and LINE-SEP as the line separator."
   (let ((items '())
+        (lines '())
         (offset 0)
+        (rawlines (if line-sep (split-string data line-sep) (list data)))
+        (line "")
         (current-word "")
         (state :read-word))
     (catch 'return
-      (loop
-       (when (= offset (length line))
-         ;; all done
-         (cl-ecase state
-           (:in-string
-            (error "Unterminated string"))
-           (:read-word
-            (throw 'return
-                   (nreverse (cons current-word items))))))
-       (let ((current (aref line offset)))
-         (cond
-          ((char-equal separator current)
+      (progn
+        (setq line (pop rawlines))
+        (loop
+         (when (or (not line) (= offset (length line)))
+           ;; all done
            (cl-ecase state
              (:in-string
-              (setq current-word (concat current-word (char-to-string current))))
+              (if rawlines; have more lines
+                  (progn
+                    (setq offset 0)
+                    (setq line (pop rawlines)))
+                (error "Unterminated string")))
              (:read-word
-              (push current-word items)
-              (setq current-word ""))))
-          ((char-equal quote-char current)
-           (cl-ecase state
-             (:in-string
-              (let ((offset+1 (1+ offset)))
-                (cond
-                 ((and (/= offset+1 (length line))
-                       (char-equal quote-char (aref line offset+1)))
-                  (setq current-word (concat current-word (char-to-string quote-char)))
-                  (incf offset))
-                 (t (setq state :read-word)))))
-             (:read-word
-              (setq state :in-string))))
-          (t
-           (setq current-word (concat current-word (char-to-string current))))))
-       (incf offset)))))
+              ;; new line!
+              (push (nreverse (cons current-word items)) lines)
+              (if rawlines
+                  (progn
+                    (setq current-word "")
+                    (setq items '())
+                    (setq offset 0)
+                    (setq line (pop rawlines)))
+                (throw 'return
+                       (nreverse lines))))))
+         (let ((current (aref line offset)))
+           (cond
+            ((char-equal separator current)
+             (cl-ecase state
+               (:in-string
+                (setq current-word (concat current-word (char-to-string current))))
+               (:read-word
+                (push current-word items)
+                (setq current-word ""))))
+            ((char-equal quote-char current)
+             (cl-ecase state
+               (:in-string
+                (let ((offset+1 (1+ offset)))
+                  (cond
+                   ((and (/= offset+1 (length line))
+                         (char-equal quote-char (aref line offset+1)))
+                    (setq current-word (concat current-word (char-to-string quote-char)))
+                    (incf offset))
+                   (t (setq state :read-word)))))
+               (:read-word
+                (setq state :in-string))))
+            (t
+             (setq current-word (concat current-word (char-to-string current))))))
+         (incf offset))))))
 
 (provide 'parse-csv)
 
