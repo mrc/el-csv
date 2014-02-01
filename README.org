@@ -20,5 +20,8 @@ It was ported to Emacs Lisp by Matt Curtis.
     => ("a" "b" "c;d")
 
 (parse-csv-string-rows "a,b,c,do\"\ng\"\ne,f,g,h" ?\, ?\" "\n")
-    => (("a" "b" "c" "dog") ("e" "f" "g" "h"))
+    => (("a" "b" "c" "do\ng") ("e" "f" "g" "h"))
+
+(parse-csv-string-rows "a,b,c,do\"\ng\"\n\ne,f,g,h" ?\, ?\" "\n")
+    => (("a" "b" "c" "do\ng") ("") ("e" "f" "g" "h"))
 #+END_SRC

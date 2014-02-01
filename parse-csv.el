@@ -93,6 +93,7 @@ string quoting character, and LINE-SEP as the line separator."
               (if rawlines; have more lines
                   (progn
                     (setq offset 0)
+                    (setq current-word (concat current-word line-sep))
                     (setq line (pop rawlines)))
                 (error "Unterminated string")))
              (:read-word
@@ -106,6 +107,18 @@ string quoting character, and LINE-SEP as the line separator."
                     (setq line (pop rawlines)))
                 (throw 'return
                        (nreverse lines))))))
+         ;; handle empty line
+         (if (= 0 (length line))
+             (cl-ecase state
+               (:in-string
+                (setq offset 0)
+                (setq current-word (concat current-word line-sep))
+                (setq line (pop rawlines)))
+               (:read-word
+                ;; new line!
+                (push (nreverse (cons current-word items)) lines)
+                (setq offset 0)
+                (setq line (pop rawlines))))
          (let ((current (aref line offset)))
            (cond
             ((char-equal separator current)
@@ -129,7 +142,7 @@ string quoting character, and LINE-SEP as the line separator."
                 (setq state :in-string))))
             (t
              (setq current-word (concat current-word (char-to-string current))))))
-         (incf offset))))))
+         (incf offset)))))))
 
 (provide 'parse-csv)
 

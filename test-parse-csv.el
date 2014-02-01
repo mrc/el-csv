@@ -43,6 +43,17 @@ monkies,rabbits,cherries" ?\, ?\" "
 
 (ert-deftest parse-csv-string-rows/two-simple-lines-correctly ()
   "Should parse two rows correctly"
-  (should (equal (length (parse-csv-string-rows "apples,bananas,carrots
-monkies,rabbits,cherries" ?\, ?\" "
-")))))
+  (should (equal (parse-csv-string-rows "apples,bananas,carrots\nmonkies,rabbits,cherries" ?\, ?\" "\n")
+                 '(("apples" "bananas" "carrots") ("monkies" "rabbits" "cherries")))))
+
+(ert-deftest parse-csv-string-rows/three-simple-lines-with-empy-line-correctly ()
+  "Should parse three lines with a blank middle row correctly"
+  (should (equal (parse-csv-string-rows "apples,bananas,carrots\n\nmonkies,rabbits,cherries" ?\, ?\" "\n")
+                 '(("apples" "bananas" "carrots") ("") ("monkies" "rabbits" "cherries")))))
+
+(ert-deftest parse-csv-string-rows/three-simple-lines-with-empy-line-correctly ()
+  "Should parse two lines with a multiline row correctly"
+  (should
+   (equal
+    (parse-csv-string-rows "apples,bananas,\"carrots\nare delicious\"\nmonkies,rabbits,cherries" ?\, ?\" "\n")
+    '(("apples" "bananas" "carrots\nare delicious") ("monkies" "rabbits" "cherries")))))
