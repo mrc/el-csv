@@ -85,7 +85,7 @@ string quoting character, and LINE-SEP as the line separator."
     (catch 'return
       (progn
         (setq line (pop rawlines))
-        (loop
+        (cl-loop
          (when (or (not line) (= offset (length line)))
            ;; all done
            (cl-ecase state
@@ -136,13 +136,13 @@ string quoting character, and LINE-SEP as the line separator."
                    ((and (/= offset+1 (length line))
                          (char-equal quote-char (aref line offset+1)))
                     (setq current-word (concat current-word (char-to-string quote-char)))
-                    (incf offset))
+                    (cl-incf offset))
                    (t (setq state :read-word)))))
                (:read-word
                 (setq state :in-string))))
             (t
              (setq current-word (concat current-word (char-to-string current))))))
-         (incf offset)))))))
+         (cl-incf offset)))))))
 
 (provide 'parse-csv)
 
